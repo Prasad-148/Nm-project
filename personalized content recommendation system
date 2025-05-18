@@ -1,0 +1,48 @@
+# content_recommender.py
+
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Sample content dataset (can be replaced with a CSV or database)
+data = {
+    'title': [
+        "AI in Healthcare",
+        "Deep Learning for Image Recognition",
+        "Natural Language Processing Basics",
+        "AI for Personalized Marketing",
+        "Understanding Transformers in NLP"
+    ],
+    'content': [
+        "Artificial Intelligence is transforming healthcare with diagnostic tools.",
+        "Deep learning models like CNNs are powerful for image classification.",
+        "NLP involves processing and analyzing large amounts of natural language data.",
+        "AI helps deliver personalized marketing messages to consumers.",
+        "Transformers are a deep learning model revolutionizing NLP tasks."
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Vectorize the content using TF-IDF
+vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_matrix = vectorizer.fit_transform(df['content'])
+
+# Function to recommend articles based on a user query
+def recommend_content(user_input, top_n=3):
+    user_vec = vectorizer.transform([user_input])
+    similarities = cosine_similarity(user_vec, tfidf_matrix).flatten()
+    indices = similarities.argsort()[::-1][:top_n]
+    
+    recommendations = df.iloc[indices][['title', 'content']]
+    return recommendations
+
+# Example usage
+if _name_ == "_main_":
+    user_query = input("Enter your interest/topic: ")
+    recommendations = recommend_content(user_query)
+    
+    print("\nRecommended Content:\n")
+    for i, row in recommendations.iterrows():
+        print(f"Title: {row['title']}")
+        print(f"Content: {row['content']}\n")
